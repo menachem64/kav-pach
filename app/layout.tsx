@@ -3,7 +3,7 @@ import "./globals.css";
 import { Assistant, Heebo, Outfit, Varela_Round } from 'next/font/google';
 
 
-const assistant = Assistant({ subsets: ['latin'], weight: ['300', '400', '500'] });
+const assistant = Assistant({ subsets: ['hebrew'], weight: ['300', '400', '500'] });
 
 const heebo = Heebo({ 
   subsets: ['hebrew'], 
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl">
       <body
-        className={`bg-[#F8FAFC] text-slate-900 antialiased ${heebo.className}`}
+        className={`bg-[#F8FAFC] text-slate-900 antialiased ${assistant.className}`}
       >
         {children}
       </body>

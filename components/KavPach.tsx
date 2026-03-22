@@ -16,29 +16,20 @@ import type {
   SortConfig,
 } from "@/lib/types";
 
-// ── Google Sheets loader ─────────────────────────────────────────────────────
+// ── Local CSV loader ─────────────────────────────────────────────────────────
 
-async function loadFromSheets(url: string): Promise<Trip[]> {
-  const encoded = encodeURIComponent(url);
-  const res = await fetch(`/api/sheets?url=${encoded}`);
+const LOCAL_CSV_PATH = process.env.NEXT_PUBLIC_LOCAL_CSV_PATH || "/data.csv";
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "שגיאה לא ידועה" }));
-    throw new Error(err.error || `HTTP ${res.status}`);
-  }
-
+async function loadFromLocalCsv(): Promise<Trip[]> {
+  const res = await fetch(LOCAL_CSV_PATH);
+  if (!res.ok) throw new Error(`לא נמצא קובץ CSV מקומי (${res.status})`);
   const csvText = await res.text();
-
   return new Promise((resolve, reject) => {
     Papa.parse<Record<string, unknown>>(csvText, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        try {
-          resolve(parseRows(results.data));
-        } catch (e) {
-          reject(e);
-        }
+        try { resolve(parseRows(results.data)); } catch (e) { reject(e); }
       },
       error: (err: Error) => reject(err),
     });
@@ -52,39 +43,17 @@ interface DataSourcePanelProps {
 }
 
 function DataSourcePanel({ onTripsLoaded }: DataSourcePanelProps) {
-  const [sheetsUrl, setSheetsUrl] = useState(
-    process.env.NEXT_PUBLIC_GOOGLE_SHEETS_URL || ""
-  );
-  const [sheetsLoading, setSheetsLoading] = useState(false);
-  const [sheetsError, setSheetsError] = useState<string | null>(null);
-  const [sheetsSuccess, setSheetsSuccess] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [csvError, setCsvError] = useState<string | null>(null);
   const [fileLoading, setFileLoading] = useState(false);
-  const [autoTried, setAutoTried] = useState(false);
 
-  // Auto-fetch on mount if env URL is set
   useEffect(() => {
-    if (sheetsUrl && !autoTried) {
-      setAutoTried(true);
-      fetchSheets(sheetsUrl);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadFromLocalCsv()
+      .then((trips) => onTripsLoaded(trips))
+      .catch((e) => setCsvError(e instanceof Error ? e.message : "שגיאה"))
+      .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const fetchSheets = async (url: string) => {
-    if (!url.trim()) return;
-    setSheetsLoading(true);
-    setSheetsError(null);
-    setSheetsSuccess(false);
-    try {
-      const trips = await loadFromSheets(url.trim());
-      setSheetsSuccess(true);
-      onTripsLoaded(trips);
-    } catch (e) {
-      setSheetsError(e instanceof Error ? e.message : "שגיאה בטעינת הנתונים");
-    } finally {
-      setSheetsLoading(false);
-    }
-  };
 
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -97,21 +66,17 @@ function DataSourcePanel({ onTripsLoaded }: DataSourcePanelProps) {
       const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(
         wb.Sheets[wb.SheetNames[0]]
       );
-      const parsed = parseRows(rows);
-      onTripsLoaded(parsed);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setFileLoading(false);
-    }
+      onTripsLoaded(parseRows(rows));
+    } catch (err) { console.error(err); }
+    finally { setFileLoading(false); }
   };
 
-  if (sheetsLoading || fileLoading) {
+  if (loading || fileLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-40">
         <Ic n="loader" size={64} cls="text-slate-900" animate={true} />
         <h2 className="text-2xl font-black text-slate-800 mt-8 mb-2">
-          {sheetsLoading ? "טוען מ-Google Sheets..." : "מנתח נתונים..."}
+          {fileLoading ? "מנתח נתונים..." : "טוען נתונים..."}
         </h2>
       </div>
     );
@@ -123,78 +88,32 @@ function DataSourcePanel({ onTripsLoaded }: DataSourcePanelProps) {
         <Ic n="trash" size={48} cls="text-slate-300" />
       </div>
       <h2 className="text-3xl font-black text-slate-800 mb-2">מוכנים לזרוק קווים?</h2>
-      <h3 className="text-xl font-black text-slate-700 mb-8 bg-indigo-50 text-indigo-800 px-5 py-2 rounded-xl border border-indigo-100 shadow-sm inline-block">
+      <h3 className="text-xl font-black mb-8 bg-indigo-50 text-indigo-800 px-5 py-2 rounded-xl border border-indigo-100 shadow-sm inline-block">
         המערכת שמוצאת קווים שאפשר לזרוק לפח
       </h3>
 
-      {/* Google Sheets section */}
-      {/* <div className="w-full bg-slate-50 border-2 border-slate-200 rounded-[2rem] p-6 mb-6 text-right">
-        <div className="flex items-center gap-2 mb-3">
-          <Ic n="link" size={20} cls="text-indigo-600" />
-          <span className="font-black text-slate-800 text-lg">טעינה מ-Google Sheets</span>
-          <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded-full">מומלץ</span>
-        </div>
-        <p className="text-slate-500 text-sm font-medium mb-4 leading-relaxed">
-          הדבק קישור ל-Google Sheet עם נתוני התיקופים. הגיליון חייב להיות מוגדר כ&quot;ציבורי לכל מי שיש לו את הקישור&quot;.
-        </p>
-        <div className="flex gap-2">
-          <input
-            type="url"
-            value={sheetsUrl}
-            onChange={(e) => setSheetsUrl(e.target.value)}
-            placeholder="https://docs.google.com/spreadsheets/d/..."
-            dir="ltr"
-            className="flex-1 bg-white border-2 border-slate-200 rounded-2xl px-4 py-3 font-medium text-sm outline-none focus:border-indigo-500 text-left transition-all shadow-sm"
-          />
-          <button
-            onClick={() => fetchSheets(sheetsUrl)}
-            disabled={!sheetsUrl.trim()}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white px-6 py-3 rounded-2xl font-black transition-all shadow-md flex items-center gap-2 whitespace-nowrap"
-          >
-            <Ic n="refresh" size={16} />
-            טעינה
-          </button>
-        </div>
-
-        {sheetsError && (
-          <div className="mt-3 bg-rose-50 border border-rose-200 text-rose-700 text-sm font-bold rounded-2xl px-4 py-3 flex items-start gap-2 text-right">
-            <Ic n="alert" size={16} cls="mt-0.5 shrink-0" />
-            <span>{sheetsError}</span>
+      {/* {csvError && (
+        <div className="w-full mb-6 bg-amber-50 border border-amber-200 text-amber-800 text-sm font-bold rounded-2xl px-5 py-4 flex items-start gap-3 text-right">
+          <Ic n="alert" size={18} cls="mt-0.5 shrink-0 text-amber-500" />
+          <div>
+            <div className="font-black mb-1">לא נמצא קובץ CSV מקומי</div>
+            <div className="font-medium text-amber-700">
+              הניח קובץ <span dir="ltr" className="font-mono bg-amber-100 px-1 rounded">data.csv</span> בתיקיית{" "}
+              <span dir="ltr" className="font-mono bg-amber-100 px-1 rounded">public/</span> לטעינה אוטומטית,
+              או העלה קובץ אקסל ידנית.
+            </div>
           </div>
-        )}
-        {sheetsSuccess && (
-          <div className="mt-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-bold rounded-2xl px-4 py-3 flex items-center gap-2">
-            <Ic n="check" size={16} />
-            <span>הנתונים נטענו בהצלחה!</span>
-          </div>
-        )}
-      </div> */}
+        </div>
+      )} */}
 
-      {/* Divider */}
-      {/* <div className="w-full flex items-center gap-4 mb-6">
-        <div className="flex-1 h-px bg-slate-200" />
-        <span className="text-slate-400 text-sm font-black">
-          {sheetsError ? "או לחלופין" : "או"}
-        </span>
-        <div className="flex-1 h-px bg-slate-200" />
-      </div> */}
-
-      {/* File upload fallback */}
       <div className="w-full">
         <p className="text-slate-500 font-medium mb-4 text-sm">
-          {sheetsError
-            ? "מכיוון שהטעינה מ-Google Sheets נכשלה, ניתן להעלות קובץ Excel מקומי."
-            : "העלאת קובץ Excel ישירות מהמחשב שלך."}
+          העלאת קובץ Excel ישירות מהמחשב שלך.
         </p>
-        <label className={`inline-flex items-center gap-3 px-10 py-4 rounded-[2rem] font-black text-lg cursor-pointer transition-all shadow-lg active:scale-95 ${sheetsError ? "bg-slate-900 hover:bg-black text-white hover:scale-105" : "bg-slate-100 hover:bg-slate-200 text-slate-600"}`}>
+        <label className="inline-flex items-center gap-3 px-10 py-4 rounded-[2rem] font-black text-lg cursor-pointer transition-all shadow-lg active:scale-95 bg-slate-900 hover:bg-black text-white hover:scale-105">
           <Ic n="upload" size={20} />
           העלאת קובץ אקסל
-          <input
-            type="file"
-            className="hidden"
-            accept=".xlsx,.xls"
-            onChange={onFile}
-          />
+          <input type="file" className="hidden" accept=".xlsx,.xls" onChange={onFile} />
         </label>
       </div>
     </div>
