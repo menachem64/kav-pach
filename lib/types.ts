@@ -95,7 +95,7 @@ export interface OkOptimization {
 
 export type Optimization = MergeOptimization | CancelOptimization | OkOptimization;
 
-export type TabType = "redundant" | "allTrips" | "simulator" | "about";
+export type TabType = "redundant" | "allTrips" | "simulator" | "about" | "overlap";
 
 export type SortDirection = "asc" | "desc";
 
