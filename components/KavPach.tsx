@@ -393,7 +393,7 @@ export default function KavPach() {
       const range = window.XLSX.utils.decode_range(ws['!ref'] || "A1");
       const enc = window.XLSX.utils.encode_cell;
 
-      const headers = [];
+      const headers: string[] = [];
       for (let c = range.s.c; c <= range.e.c; c++) {
         const cell = ws[enc({ r: 0, c })];
         headers.push(cell ? String(cell.v ?? "") : "");
@@ -454,7 +454,7 @@ export default function KavPach() {
 
       const routes = new Map();
       for (const [routeId, stops] of routeStops.entries()) {
-        stops.sort((a, b) => a.order - b.order);
+        stops.sort((a: { order: number; }, b: { order: number; }) => a.order - b.order);
         const parts   = String(routeId).split('-');
         const makat   = parts[0];
         const rawDir  = parts[1] || '0';
@@ -501,7 +501,7 @@ export default function KavPach() {
         for (let i = 0; i < arr.length; i++) {
           for (let j = i + 1; j < arr.length; j++) {
             const x = arr[i], y = arr[j];
-            candidatePairs.add(x < y ? `${x}|${y}` : `${y}|${x}`);
+            candidatePairs.add(`${y}|${x}`);
           }
         }
         processed++;
@@ -2749,7 +2749,7 @@ export default function KavPach() {
                                         <span className="text-indigo-400 bg-indigo-50 p-0.5 rounded-full shrink-0" title="קו לילה"><Ic n="moon" size={12} /></span>
                                       )}
                                       <div className="flex flex-col gap-1 overflow-hidden">
-                                        {ab.after > 0 && <span className="text-[10px] text-slate-400 font-bold">ממשיך +{ab.after} ת&quot;</span>}
+                                       <span className="text-[10px] text-slate-400 font-bold">ממשיך +{ab.after} ת&quot;</span>
                                         <RouteFormat val={ab.route || ab.line} />
                                       </div>
                                     </div>
@@ -2763,7 +2763,7 @@ export default function KavPach() {
                                   <div key={ci} className="bg-slate-50 rounded-xl p-3 border border-slate-100">
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="text-xs font-bold text-slate-600">
-                                        כיוון {ci + 1}: {card.segStartName || card.segment?.firstStop}
+                                        כיוון {ci}: {card.segStartName || card.segment?.firstStop}
                                         <span style={{ color: '#aaa', margin: '0 6px' }}>—→</span>
                                         {card.segEndName || card.segment?.lastStop}
                                       </span>
@@ -2793,7 +2793,7 @@ export default function KavPach() {
                                 <span className="text-sm font-bold" style={{ color: '#555' }}>~{avgPct}% ממוצע</span>
                               </div>
                               <div className="space-y-2">
-                                {r._cards.map((card, ci) => {
+                                {r._cards.map((card: { coverageA: number; coverageB: number; lineA: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<React.AwaitedReactNode> | null | undefined; lineB: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<React.AwaitedReactNode> | null | undefined; pct: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; segment: { length: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<React.AwaitedReactNode> | null | undefined; firstStop: any; lastStop: any; }; segStartName: any; segEndName: any; routeA: string | undefined; routeB: string | undefined; explanation: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; }, ci: React.Key | null | undefined) => {
                                   const cl = card.coverageA >= card.coverageB ? card.coverageA : card.coverageB;
                                   return (
                                     <div key={ci} className="bg-slate-50 rounded-xl p-3 border border-slate-100">
@@ -2802,7 +2802,7 @@ export default function KavPach() {
                                           <span className="bg-slate-800 text-white px-2 py-0.5 rounded text-xs font-bold">{card.lineA}</span>
                                           <span className="text-slate-400 text-xs">↔</span>
                                           <span className="bg-slate-600 text-white px-2 py-0.5 rounded text-xs font-bold">{card.lineB}</span>
-                                          <span className="text-xs text-slate-500 font-bold">כיוון {ci + 1}</span>
+                                          <span className="text-xs text-slate-500 font-bold">כיוון {ci}</span>
                                         </div>
                                         <span className="text-xs font-bold text-teal-700">{card.pct}%</span>
                                       </div>
@@ -2874,7 +2874,7 @@ export default function KavPach() {
                                 </div>
                                 <div className="bg-slate-50 rounded-xl p-3">
                                   <div className="text-xs font-bold text-slate-500 mb-2">קווים קולטים:</div>
-                                  {r._absorbers.map((ab, ai) => (
+                                  {r._absorbers.map((ab: { line: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; after: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<React.AwaitedReactNode> | null | undefined; route: any; }, ai: React.Key | null | undefined) => (
                                     <div key={ai} className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-200 last:border-0 last:mb-0 last:pb-0">
                                       <div className="flex items-center gap-1 shrink-0">
                                         <span className="bg-slate-700 text-white px-2 py-0.5 rounded text-xs font-bold">{ab.line}</span>
@@ -2883,7 +2883,7 @@ export default function KavPach() {
                                         )}
                                       </div>
                                       <div className="flex flex-col gap-1 overflow-hidden">
-                                        {ab.after > 0 && <span className="text-[10px] text-slate-400 font-bold">ממשיך +{ab.after} תח'</span>}
+                                        <span className="text-[10px] text-slate-400 font-bold">ממשיך +{ab.after} תח&apos;</span>
                                         <RouteFormat val={ab.route || ab.line} />
                                       </div>
                                     </div>
@@ -2910,7 +2910,7 @@ export default function KavPach() {
                                   {r.segEndName || r.segment.lastStop}
                                 </div>
                                 <div className="mt-2 text-xs" style={{ color: '#777' }}>
-                                  {r._absorbers.map((ab, ai) => (
+                                  {r._absorbers.map((ab: { line: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; origin: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; dest: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; after: number; }, ai: React.Key | null | undefined) => (
                                     <div key={ai}>
                                       <span className="font-bold">קו {ab.line}:</span> {ab.origin} ← {ab.dest}
                                       {ab.after > 0 && ` (ממשיך ${ab.after} תחנות נוספות)`}
