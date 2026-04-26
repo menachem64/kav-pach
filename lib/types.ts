@@ -14,6 +14,10 @@ export interface Trip {
   ridership: number;
   peakLoad: number;
   efficiency: number;
+  // שדות חדשים
+  usedMetric?: string;      // המדד שנבחר לחישוב (למשל "ridership" או "load")
+  metricVal?: number;       // הערך המספרי של המדד
+  isNightLine?: boolean;    // האם מדובר בקו לילה
 }
 
 export interface RedundantLine {
@@ -27,6 +31,8 @@ export interface RedundantLine {
   status: string;
   percentLow: number;
   avgPeak: number;
+  // שדות חדשים (אם רלוונטי גם ברמת הקו)
+  isNightLine?: boolean;
 }
 
 export interface MergeOptimization {
@@ -45,6 +51,9 @@ export interface MergeOptimization {
   total: number;
   riders1: number;
   riders2: number;
+  // שדות חדשים
+  usedMetric?: string;
+  metricVal?: number;
 }
 
 export interface CancelOptimization {
@@ -60,6 +69,10 @@ export interface CancelOptimization {
   days: string;
   ridership: number;
   efficiency: number;
+  // שדות חדשים
+  usedMetric?: string;
+  metricVal?: number;
+  isNightLine?: boolean;
 }
 
 export interface OkOptimization {
@@ -74,6 +87,10 @@ export interface OkOptimization {
   days: string;
   ridership: number;
   efficiency: number;
+  // שדות חדשים
+  usedMetric?: string;
+  metricVal?: number;
+  isNightLine?: boolean;
 }
 
 export type Optimization = MergeOptimization | CancelOptimization | OkOptimization;
