@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 
   // איך הקישור יראה כשמשתפים אותו (WhatsApp, Facebook, LinkedIn)
   openGraph: {
+    
     title: "קו פח – מאתרים קווים ריקים",
     description: "המערכת המובילה לניתוח נתוני תחבורה ציבורית בזמן אמת",
     url: "https://www.kav-pach.co.il", // הכתובת של האתר שלך
