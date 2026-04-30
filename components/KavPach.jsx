@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from "react"
 
 // ── Google Fonts - Heebo ──────────────────────────────────────────────────
 if (!document.getElementById('heebo-font')) {
+  
   const fontLink = document.createElement("link");
   fontLink.id = "heebo-font";
   fontLink.href = "https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap";
