@@ -155,7 +155,7 @@ const RouteFormat = ({ val }) => {
   return (
     <div className="inline-flex flex-wrap items-center gap-1.5 whitespace-nowrap text-[11px]" dir="rtl">
       <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600 font-medium shadow-sm">
-        מק"ט: <strong className="font-black text-slate-900">{makat}</strong>
+        מק&quot;ט: <strong className="font-black text-slate-900">{makat}</strong>
       </span>
       {dir && (
         <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-600 font-medium shadow-sm">
