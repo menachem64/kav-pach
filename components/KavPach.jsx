@@ -2,6 +2,10 @@
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 
+
+import { motion, AnimatePresence } from "framer-motion";
+import { ExternalLink, Info } from "lucide-react"; // ספריות אייקונים מוסיפות טאץ' מקצועי
+
 // ── Google Fonts - Heebo ──────────────────────────────────────────────────
 if (typeof document !== 'undefined' && !document.getElementById('heebo-font')) {
   const fontLink = document.createElement("link");
@@ -1563,11 +1567,67 @@ const DAYS_FILTER = [
     runOptimization(lineNum, city || "all", "all", []);
   };
 
+        const NEW_URL = "https://transit-freak.github.io/Kav-Pach/"
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    // השהייה קלה לפני הצגת ההודעה למראה אורגני
+    const timer = setTimeout(() => setIsOpen(true), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 p-4 md:p-6 pb-20" style={{ fontFamily: "'Heebo', sans-serif" }} dir="rtl">
       <datalist id="cities-list">
         {allCities.map(c => <option key={`dl-city-${c}`} value={c} />)}
       </datalist>
+
+      <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white dir-rtl w-full max-w-md overflow-hidden rounded-2xl shadow-2xl border border-gray-100"
+          >
+            <div className="p-8 text-center">
+              {/* אייקון עליון */}
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-blue-50">
+                <Info className="h-7 w-7 text-blue-600" />
+              </div>
+
+              <h2 className="mb-3 text-2xl font-bold text-gray-900">התחדשנו!</h2>
+              
+              <p className="mb-8 text-gray-600 leading-relaxed">
+                האתר עבר לכתובת חדשה כדי להעניק לכם חווית גלישה טובה ומהירה יותר.
+                ניתן לעבור לכתובת החדשה בלחיצה על הכפתור מטה.
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <a
+                  href={NEW_URL}
+                  className="flex items-center justify-center gap-2 w-full rounded-xl bg-blue-600 px-6 py-3.5 text-white font-semibold transition-all hover:bg-blue-700 hover:shadow-lg active:scale-[0.98]"
+                >
+                  למעבר לאתר החדש
+                  <ExternalLink size={18} />
+                </a>
+                
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm text-gray-400 hover:text-gray-600 transition-colors py-2"
+                >
+                  הישאר כאן בינתיים
+                </button>
+              </div>
+            </div>
+
+            {/* פס דקורטיבי בתחתית */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-blue-400 to-indigo-600" />
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
 
       <div className="max-w-6xl mx-auto">
         <header className="mb-10 flex flex-col md:flex-row items-center justify-between gap-6">
